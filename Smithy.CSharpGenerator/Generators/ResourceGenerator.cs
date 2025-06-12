@@ -26,33 +26,31 @@ public class ResourceGenerator
         // Generate resource class
         inner.AppendLine($"public class {NamingUtils.PascalCase(resourceShape.Id)}");
         inner.AppendLine("{");
-        
-        // Generate identifiers
+          // Generate identifiers
         if (resourceShape.Identifiers != null)
         {
             inner.AppendLine("    // Resource identifiers");
             foreach (var identifier in resourceShape.Identifiers)
             {
                 // Get target shape
-                var targetShape = model.GetShape(identifier.Target);
+                var targetShape = model.GetShape(identifier.Value);
                 string typeName = _typeMapper.MapToType(targetShape);
                 
-                inner.AppendLine($"    public {typeName} {NamingUtils.PascalCase(identifier.Name)} {{ get; set; }}");
+                inner.AppendLine($"    public {typeName} {NamingUtils.PascalCase(identifier.Key)} {{ get; set; }}");
             }
             inner.AppendLine();
         }
-        
-        // Generate properties
+          // Generate properties
         if (resourceShape.Properties != null)
         {
             inner.AppendLine("    // Resource properties");
             foreach (var property in resourceShape.Properties)
             {
                 // Get target shape
-                var targetShape = model.GetShape(property.Target);
+                var targetShape = model.GetShape(property.Value);
                 string typeName = _typeMapper.MapToType(targetShape);
                 
-                inner.AppendLine($"    public {typeName} {NamingUtils.PascalCase(property.Name)} {{ get; set; }}");
+                inner.AppendLine($"    public {typeName} {NamingUtils.PascalCase(property.Key)} {{ get; set; }}");
             }
             inner.AppendLine();
         }

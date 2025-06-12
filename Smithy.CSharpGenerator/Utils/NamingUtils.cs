@@ -16,20 +16,29 @@ namespace Smithy.CSharpGenerator.Utils
                     sb.Append(part.Substring(1));
             }
             return sb.ToString();
-        }
-        
-        public static string KebabCase(string id)
+        }        public static string KebabCase(string id)
         {
             if (string.IsNullOrEmpty(id)) return id;
+            
+            // Remove any namespace or version prefix (e.g., com.example#MyService -> MyService)
+            int hashIndex = id.LastIndexOf('#');
+            if (hashIndex >= 0 && hashIndex < id.Length - 1)
+            {
+                id = id.Substring(hashIndex + 1);
+            }
+            
             var sb = new StringBuilder();
             
             for (int i = 0; i < id.Length; i++)
             {
-                if (i > 0 && char.IsUpper(id[i]))
+                char c = id[i];
+                
+                if (i > 0 && char.IsUpper(c))
                 {
                     sb.Append('-');
                 }
-                sb.Append(char.ToLower(id[i]));
+                
+                sb.Append(char.ToLower(c));
             }
             
             return sb.ToString();

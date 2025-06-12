@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using Smithy.Model;
 using Smithy.CSharpGenerator;
+using Smithy.Model.Parsers;
+using Smithy.Model.Validation;
 
 // See https://aka.ms/new-console-template for more information
 Console.WriteLine("Hello, World!");
