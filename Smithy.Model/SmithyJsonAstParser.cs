@@ -20,9 +20,8 @@ namespace Smithy.Model
             // Metadata
             if (doc["metadata"] is JsonObject metadataObj)
             {
-                model.Metadata = new Dictionary<string, object>();
-                foreach (var kv in metadataObj)
-                    model.Metadata[kv.Key] = kv.Value?.ToString();
+                model.Metadata = new Dictionary<string, object>();                foreach (var kv in metadataObj)
+                    model.Metadata[kv.Key] = kv.Value?.ToString() ?? string.Empty;
             }
 
             // Shapes
@@ -41,9 +40,8 @@ namespace Smithy.Model
                             if (shapeNode["members"] is JsonObject membersObj)
                             {
                                 foreach (var memKvp in membersObj)
-                                {
-                                    var memName = memKvp.Key;
-                                    var memTarget = memKvp.Value?["target"]?.ToString() ?? memKvp.Value?.ToString();
+                                {                                    var memName = memKvp.Key;
+                                    var memTarget = memKvp.Value?["target"]?.ToString() ?? memKvp.Value?.ToString() ?? string.Empty;
                                     structure.Members.Add(new MemberShape { Name = memName, Target = memTarget });
                                 }
                             }

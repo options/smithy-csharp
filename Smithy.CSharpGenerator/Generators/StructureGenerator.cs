@@ -20,12 +20,11 @@ public class StructureGenerator
         if (isException)
         {
             baseClass = " : Exception";
-            
-            // Determine which type of exception based on error trait value
+              // Determine which type of exception based on error trait value
             var errorTrait = structureShape.ConstraintTraits.FirstOrDefault(t => t.Name == "error");
             if (errorTrait?.Properties.TryGetValue("value", out var errorType) == true)
             {
-                string errorTypeStr = errorType?.ToString()?.ToLowerInvariant();
+                string? errorTypeStr = errorType?.ToString()?.ToLowerInvariant();
                 if (errorTypeStr == "client")
                     baseClass = " : ArgumentException";
                 else if (errorTypeStr == "server")

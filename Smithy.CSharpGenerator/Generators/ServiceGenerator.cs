@@ -117,14 +117,14 @@ public class ServiceGenerator
         
         // Add constraint attributes
         inner.Append(_constraintAttributeGenerator.FormatConstraintAttributes(operation.ConstraintTraits));
-        
-        // Add HTTP protocol attributes
+          // Add HTTP protocol attributes
         var httpTrait = operation.ConstraintTraits.FirstOrDefault(t => t.Name == "http");
-        inner.Append(_httpProtocolGenerator.FormatHttpTrait(httpTrait));
-        
-        // Add HTTP error attributes
+        if (httpTrait != null)
+            inner.Append(_httpProtocolGenerator.FormatHttpTrait(httpTrait));
+          // Add HTTP error attributes
         var httpErrorTrait = operation.ConstraintTraits.FirstOrDefault(t => t.Name == "httpError");
-        inner.Append(_httpProtocolGenerator.FormatHttpErrorTrait(httpErrorTrait));
+        if (httpErrorTrait != null)
+            inner.Append(_httpProtocolGenerator.FormatHttpErrorTrait(httpErrorTrait));
         
         // Generate method implementation
         if (outputType == "void")
