@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace Smithy.Model
 {
-    public class ConstraintTrait
+    public partial class ConstraintTrait
     {
         public string Name { get; set; } = string.Empty; // e.g., "length", "pattern"
         public Dictionary<string, object> Properties { get; set; } = new(); // e.g., {"min": 1, "max": 10}

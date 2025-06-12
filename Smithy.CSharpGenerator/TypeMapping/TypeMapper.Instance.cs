@@ -3,7 +3,7 @@ using Smithy.CSharpGenerator.Utils;
 
 namespace Smithy.CSharpGenerator.TypeMapping;
 
-public class TypeMapper
+public partial class TypeMapper
 {
     /// <summary>
     /// Map a Smithy shape to its corresponding C# type

@@ -11,8 +11,11 @@ namespace Smithy.CSharpGenerator;
 
 public partial class CSharpCodeGenerator
 {
-    private readonly ConstraintAttributeGenerator _constraintAttributeGenerator = new();
-    private readonly HttpProtocolGenerator _httpProtocolGenerator = new();
+    // These fields are already defined in CSharpCodeGenerator.cs
+    // private readonly ConstraintAttributeGenerator _constraintAttributeGenerator = new();
+    // private readonly HttpProtocolGenerator _httpProtocolGenerator = new();
+    
+    // New fields for Main.cs
     private readonly ServiceGenerator _serviceGenerator = new();
     private readonly StructureGenerator _structureGenerator = new();
     private readonly ResourceGenerator _resourceGenerator = new();

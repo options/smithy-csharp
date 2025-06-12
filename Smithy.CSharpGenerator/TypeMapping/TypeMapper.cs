@@ -1,7 +1,11 @@
 namespace Smithy.CSharpGenerator.TypeMapping
 {
-    public static class TypeMapper
+    // Keeping these static methods for backward compatibility
+    public partial class TypeMapper
     {
+        // Static methods that delegate to an instance
+        private static readonly TypeMapper _instance = new TypeMapper();
+    
         public static string MapType(string smithyType, bool isStreaming = false, string? streamingTarget = null)
         {
             if (isStreaming)
