@@ -1,5 +1,9 @@
 # Smithy to C# Code Generator
 
+[![Build Status](https://github.com/options/smithy-csharp/actions/workflows/build.yml/badge.svg)](https://github.com/options/smithy-csharp/actions/workflows/build.yml)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![GitHub Release](https://img.shields.io/github/release/options/smithy-csharp.svg)](https://github.com/options/smithy-csharp/releases)
+
 A robust code generator that transforms Smithy 2.0 service models into idiomatic C# code.
 
 ## 🚀 Overview
@@ -31,7 +35,7 @@ dotnet tool install -g smithy-csharp
 ### Building from Source
 
 ```bash
-git clone https://github.com/yourusername/smithy-csharp.git
+git clone https://github.com/options/smithy-csharp.git
 cd smithy-csharp
 dotnet build
 dotnet pack -o ./nupkg
