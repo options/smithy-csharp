@@ -29,24 +29,74 @@ The Smithy to C# code generator is a tool that allows developers to define their
 ### Using .NET CLI
 
 ```bash
+# Install the tool globally
 dotnet tool install -g smithy-csharp
 ```
 
 ### Building from Source
 
 ```bash
+# Clone the repository
 git clone https://github.com/options/smithy-csharp.git
 cd smithy-csharp
+
+# Build the solution
 dotnet build
-dotnet pack -o ./nupkg
+
+# Package the tool
+# On Windows
+.\pack-tool.ps1
+# On Linux/macOS
+./pack-tool.sh
+
+# Install from local package
+dotnet tool install -g --add-source ./nupkg smithy-csharp
 ```
+
+### Versioning and Releases
+
+The project follows semantic versioning (SemVer). When creating releases:
+
+1. Update the version in `Smithy.Cli/Smithy.Cli.csproj`:
+   ```xml
+   <Version>X.Y.Z</Version>
+   <AssemblyVersion>X.Y.Z.0</AssemblyVersion>
+   <FileVersion>X.Y.Z.0</FileVersion>
+   ```
+
+2. Create and push a tag that matches the version:
+   ```bash
+   git tag vX.Y.Z
+   git push origin vX.Y.Z
+   ```
+
+This will trigger the GitHub Actions release workflow which will:
+- Build and test the solution
+- Package the tool with the version from the tag
+- Create a GitHub Release with the package attached
+- Publish the package to NuGet.org
+```
+
+You can also use the provided scripts:
+- Windows: `.\pack-tool.ps1`
+- macOS/Linux: `./pack-tool.sh`
 
 ## 📝 Usage
 
 ### Basic Usage
 
 ```bash
+# Generate C# code from a Smithy model
+smithy-cli generate path/to/smithy/file.smithy
+
+# Specify output directory
 smithy-cli generate path/to/smithy/file.smithy --output MyGeneratedCode
+
+# Get help
+smithy-cli --help
+
+# Check version
+smithy-cli --version
 ```
 
 ### Generating from Multiple Files

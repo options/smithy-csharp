@@ -6,7 +6,37 @@ using Smithy.Model.Parsers;
 using Smithy.Model.Validation;
 
 // See https://aka.ms/new-console-template for more information
-Console.WriteLine("Hello, World!");
+Console.WriteLine("Smithy C# Code Generator");
+
+// Helper methods for command-line usage
+void ShowHelp()
+{
+    Console.WriteLine("Smithy.Cli - Smithy 2.0 to C# code generator");
+    Console.WriteLine();
+    Console.WriteLine("USAGE:");
+    Console.WriteLine("  smithy-cli generate <model.smithy|model.json> [options]");
+    Console.WriteLine();
+    Console.WriteLine("COMMANDS:");
+    Console.WriteLine("  generate     Generate C# code from a Smithy model");
+    Console.WriteLine();
+    Console.WriteLine("ARGUMENTS:");
+    Console.WriteLine("  <model.smithy|model.json>   Path to Smithy IDL or JSON AST file");
+    Console.WriteLine();
+    Console.WriteLine("OPTIONS:");
+    Console.WriteLine("  -o, --output <dir>          Output directory for generated code");
+    Console.WriteLine("  -h, --help                  Show this help message");
+    Console.WriteLine("  -v, --version               Show version information");
+    Console.WriteLine();
+    Console.WriteLine("EXAMPLES:");
+    Console.WriteLine("  smithy-cli generate path/to/model.smithy");
+    Console.WriteLine("  smithy-cli generate path/to/model.smithy --output MyGeneratedCode");
+}
+
+void ShowVersion()
+{
+    var version = typeof(Program).Assembly.GetName().Version;
+    Console.WriteLine($"smithy-cli version {version}");
+}
 
 // 샘플 Smithy 모델 문자열 (실제 파서는 추후 구현)
 string sampleSmithy = @"
@@ -16,25 +46,53 @@ structure ExampleInput { foo: String, bar: Integer }
 structure ExampleOutput { }
 ";
 
-// 입력 파일 경로와 출력 파일 경로를 명령줄 인자로 받음
-string? inputPath = args.Length > 0 && !args[0].StartsWith("-") ? args[0] : null;
-string? outputPath = args.Length > 1 ? args[1] : null;
-if (args.Length > 0 && (args[0] == "--help" || args[0] == "-h"))
+// Process command line arguments
+if (args.Length > 0 && (args[0] == "--help" || args[0] == "-h" || args[0] == "help"))
 {
-    Console.WriteLine("Smithy.Cli - Smithy 2.0 to C# code generator");
-    Console.WriteLine("Usage: Smithy.Cli <model.smithy|model.json> [output.cs]");
-    Console.WriteLine("  <model.smithy|model.json> : Path to Smithy IDL or JSON AST file");
-    Console.WriteLine("  [output.cs]               : (Optional) Output C# file name");
-    Console.WriteLine("  --help, -h                : Show this help message");
-    Console.WriteLine();
-    Console.WriteLine("If no input file is provided, a sample Smithy model will be used.");
+    ShowHelp();
     return;
 }
-if (string.IsNullOrWhiteSpace(inputPath) || !System.IO.File.Exists(inputPath))
+
+if (args.Length > 0 && args[0] == "generate")
 {
-    Console.WriteLine("Usage: Smithy.Cli <model.smithy|model.json> [output.cs]");
-    Console.WriteLine("No input file provided. Using sample Smithy model.");
-    inputPath = null;
+    args = args.Skip(1).ToArray(); // Remove 'generate' command
+}
+
+// Check for --output or -o flag
+string? inputPath = null;
+string? outputDirectory = null;
+
+for (int i = 0; i < args.Length; i++)
+{
+    if ((args[i] == "--output" || args[i] == "-o") && i + 1 < args.Length)
+    {
+        outputDirectory = args[i + 1];
+        i++; // Skip the next argument since we've consumed it
+    }
+    else if (!args[i].StartsWith("-") && inputPath == null)
+    {
+        // First non-flag argument is the input file
+        inputPath = args[i];
+    }
+}
+
+if (args.Length > 0 && (args[0] == "--version" || args[0] == "-v"))
+{
+    ShowVersion();
+    return;
+}
+
+if (string.IsNullOrWhiteSpace(inputPath))
+{
+    Console.WriteLine("No input file specified.");
+    ShowHelp();
+    return;
+}
+
+if (!System.IO.File.Exists(inputPath))
+{
+    Console.WriteLine($"Error: Input file not found: {inputPath}");
+    return;
 }
 string modelText = inputPath != null ? System.IO.File.ReadAllText(inputPath) : sampleSmithy;
 ISmithyModelParser parser;
@@ -102,15 +160,30 @@ Console.WriteLine("Generating code with the updated generator...");
 var generator = new CSharpCodeGeneratorV2();
 string generatedCode = generator.Generate(model);
 
-// Determine output filename if not provided
-if (string.IsNullOrWhiteSpace(outputPath))
+// Determine output path
+string finalOutputPath;
+
+if (!string.IsNullOrWhiteSpace(outputDirectory))
 {
+    // Create output directory if it doesn't exist
+    if (!System.IO.Directory.Exists(outputDirectory))
+    {
+        System.IO.Directory.CreateDirectory(outputDirectory);
+    }
+    
     // Use service name for the filename if available
     var svc = model.Shapes.OfType<ServiceShape>().FirstOrDefault();
     var serviceName = svc != null ? svc.Id : "Generated";
-    outputPath = serviceName + ".cs";
+    finalOutputPath = Path.Combine(outputDirectory, serviceName + ".cs");
+}
+else
+{
+    // No directory specified, use current directory
+    var svc = model.Shapes.OfType<ServiceShape>().FirstOrDefault();
+    var serviceName = svc != null ? svc.Id : "Generated";
+    finalOutputPath = Path.Combine(Environment.CurrentDirectory, serviceName + ".cs");
 }
 
 // Save the generated code
-System.IO.File.WriteAllText(outputPath, generatedCode);
-Console.WriteLine($"C# code generated successfully to: {outputPath}");
+System.IO.File.WriteAllText(finalOutputPath, generatedCode);
+Console.WriteLine($"C# code generated successfully to: {finalOutputPath}");

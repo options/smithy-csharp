@@ -9,6 +9,29 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    
+    <!-- .NET Tool settings -->
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>smithy-cli</ToolCommandName>
+    <PackageOutputPath>./nupkg</PackageOutputPath>
+    
+    <!-- Package metadata -->
+    <PackageId>smithy-csharp</PackageId>
+    <Authors>Smithy C# Team</Authors>
+    <Company>Smithy C# Project</Company>
+    <Description>A tool for generating C# code from Smithy 2.0 IDL files</Description>
+    <PackageTags>smithy;codegen;idl;api;code-generator</PackageTags>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/options/smithy-csharp</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/options/smithy-csharp</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Version>1.0.4</Version>
+    <AssemblyVersion>1.0.4.0</AssemblyVersion>
+    <FileVersion>1.0.4.0</FileVersion>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
 </Project>
