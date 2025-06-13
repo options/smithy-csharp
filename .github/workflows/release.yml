@@ -12,63 +12,38 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: '8.0.x'
-        
-    - name: Set version
-      run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_ENV
-      
-    - name: Restore dependencies
-      run: dotnet restore
-      
-    - name: Build
-      run: dotnet build -c Release /p:Version=${{ env.VERSION }} --no-restore
-      
-    - name: Test
-      run: dotnet test -c Release --no-build --verbosity normal
-      
-    - name: Pack all projects
-      run: dotnet pack -c Release /p:Version=${{ env.VERSION }} --no-build -o ./nupkg
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
-    # Pack the CLI tool specifically
-    - name: Pack CLI Tool
-      run: dotnet pack Smithy.Cli/Smithy.Cli.csproj -c Release /p:Version=${{ env.VERSION }} --no-build -o ./nupkg
-      
-    # Push all NuGet packages
-    - name: Push to NuGet
-      run: dotnet nuget push ./nupkg/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
-      
-    - name: Create Release
-      id: create_release
-      uses: softprops/action-gh-release@v1
-      with:
-        name: Release ${{ github.ref_name }}
-        draft: false
-        prerelease: false
-        files: ./artifacts/*.nupkg
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test --configuration Release --no-build --verbosity normal
+
+      - name: Pack
+        run: dotnet pack --configuration Release --output ./artifacts --no-build
         
-    # Upload the NuGet packages as release assets
-    - name: Upload CLI NuGet Package
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./nupkg/smithy-csharp.${{ env.VERSION }}.nupkg
-        asset_name: smithy-csharp.${{ env.VERSION }}.nupkg
-        asset_content_type: application/octet-stream
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./nupkg/Smithy.Cli.${{ env.VERSION }}.nupkg
-        asset_name: Smithy.Cli.${{ env.VERSION }}.nupkg
-        asset_content_type: application/octet-stream
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          files: ./artifacts/*.nupkg
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish to NuGet
+        run: dotnet nuget push ./artifacts/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
