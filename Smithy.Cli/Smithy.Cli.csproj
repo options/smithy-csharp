@@ -14,9 +14,8 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>smithy-cli</ToolCommandName>
     <PackageOutputPath>./nupkg</PackageOutputPath>
-    
-    <!-- Package metadata -->
-    <PackageId>smithy-csharp</PackageId>
+      <!-- Package metadata -->
+    <PackageId>Smithy.CSharp</PackageId>
     <Authors>Smithy C# Team</Authors>
     <Company>Smithy C# Project</Company>
     <Description>A tool for generating C# code from Smithy 2.0 IDL files</Description>

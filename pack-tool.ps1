@@ -10,7 +10,9 @@ dotnet pack Smithy.Cli/Smithy.Cli.csproj -c Release -o ./nupkg
 
 Write-Host ""
 Write-Host "To install the tool locally (for testing), run:"
-Write-Host "dotnet tool install --global --add-source ./nupkg smithy-csharp"
+Write-Host "dotnet tool install --global --add-source ./nupkg Smithy.CSharp"
 Write-Host ""
 Write-Host "To uninstall:"
 Write-Host "dotnet tool uninstall --global smithy-csharp"
+Write-Host "  or"
+Write-Host "dotnet tool uninstall --global Smithy.CSharp"

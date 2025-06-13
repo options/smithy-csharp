@@ -30,7 +30,7 @@ The Smithy to C# code generator is a tool that allows developers to define their
 
 ```bash
 # Install the tool globally
-dotnet tool install -g smithy-csharp
+dotnet tool install -g Smithy.CSharp
 ```
 
 ### Building from Source
@@ -50,7 +50,7 @@ dotnet build
 ./pack-tool.sh
 
 # Install from local package
-dotnet tool install -g --add-source ./nupkg smithy-csharp
+dotnet tool install -g --add-source ./nupkg Smithy.CSharp
 ```
 
 ### Versioning and Releases
