@@ -66,11 +66,21 @@ public class StructureGenerator
             
             // Add constraint attributes for member
             inner.Append(_constraintAttributeGenerator.FormatConstraintAttributes(member.ConstraintTraits)
-                .Replace("\n", "\n    ")); // Indent attributes
+                .Replace("\n", "\n    ")); // Indent attributes            // Get target shape
+            string typeName;
             
-            // Get target shape
-            var targetShape = model.GetShape(member.Target);
-            string typeName = _typeMapper.MapToType(targetShape);
+            // If target is a simple type like "Integer", map directly
+            if (member.Target == "String" || member.Target == "Integer" || member.Target == "Boolean" ||
+                member.Target == "Float" || member.Target == "Double" || member.Target == "Long" ||
+                member.Target == "Timestamp" || member.Target == "Blob" || member.Target == "Document")
+            {
+                typeName = TypeMapper.MapType(member.Target);
+            }
+            else
+            {
+                var targetShape = model.GetShape(member.Target);
+                typeName = targetShape != null ? _typeMapper.MapToType(targetShape) : "object";
+            }
             
             // Make nullable if not required
             if (!member.ConstraintTraits.Any(t => t.Name == "required"))

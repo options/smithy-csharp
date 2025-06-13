@@ -42,7 +42,7 @@ public class CSharpCodeGeneratorTests
         Assert.Contains("[MaxLength(10)]", code);
         Assert.Contains("[Range(0, 120)]", code);
         Assert.Contains("public class MyStruct", code);
-        Assert.Contains("public int Age", code);
+        Assert.Contains("public int? Age", code);
     }
 
     private class StringEnumShape : Shape

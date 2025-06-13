@@ -422,6 +422,9 @@ public partial class CSharpCodeGenerator
             case IntEnumShape intEnumShape:
                 GenerateIntEnum(intEnumShape, inner);
                 break;
+            case Shape s when s.ConstraintTraits?.Any(t => t.Name == "enum") == true:
+                GenerateEnumFromTrait(s, inner);
+                break;
             case UnionShape union:
                 GenerateUnion(union, inner);
                 break;
@@ -452,5 +455,28 @@ public partial class CSharpCodeGenerator
                 inner.AppendLine($"// Unsupported shape type: {shape.GetType().Name}");
                 break;
         }
+    }
+      private void GenerateEnumFromTrait(Shape shape, StringBuilder inner)
+    {
+        var enumTrait = shape.ConstraintTraits.FirstOrDefault(t => t.Name == "enum");
+        if (enumTrait == null) return;
+        
+        inner.Append(_attributeFormatter.FormatConstraintAttributes(shape.ConstraintTraits));
+        inner.AppendLine($"public enum {NamingUtils.PascalCase(shape.Id)}");
+        inner.AppendLine("{");
+        
+        if (enumTrait.Properties.TryGetValue("values", out var values) && values is List<Dictionary<string, object>> enumValues)
+        {
+            foreach (var enumValue in enumValues)
+            {
+                if (enumValue.TryGetValue("name", out var name))
+                {
+                    inner.AppendLine($"    {name},");
+                }
+            }
+        }
+        
+        inner.AppendLine("}");
+        inner.AppendLine();
     }
 }
