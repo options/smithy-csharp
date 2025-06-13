@@ -8,7 +8,7 @@ public partial class TypeMapper
     /// <summary>
     /// Map a Smithy shape to its corresponding C# type
     /// </summary>
-    public string MapToType(Shape shape, bool isStreaming = false)
+    public string MapToType(Shape? shape, bool isStreaming = false)
     {
         if (shape == null)
             return "void";
