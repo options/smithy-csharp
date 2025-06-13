@@ -15,10 +15,10 @@ namespace Smithy.Model
         /// <param name="model">The Smithy model</param>
         /// <param name="shapeId">The ID of the shape to retrieve</param>
         /// <returns>The shape with the specified ID, or null if not found</returns>
-        public static T GetShape<T>(this SmithyModel model, string shapeId) where T : Shape
+        public static T? GetShape<T>(this SmithyModel model, string? shapeId) where T : Shape
         {
             if (model == null || string.IsNullOrEmpty(shapeId))
-                return null;
+                return default;
             
             return model.Shapes.OfType<T>().FirstOrDefault(s => s.Id == shapeId);
         }
@@ -29,10 +29,10 @@ namespace Smithy.Model
         /// <param name="model">The Smithy model</param>
         /// <param name="shapeId">The ID of the shape to retrieve</param>
         /// <returns>The shape with the specified ID, or null if not found</returns>
-        public static Shape GetShape(this SmithyModel model, string shapeId)
+        public static Shape? GetShape(this SmithyModel model, string? shapeId)
         {
             if (model == null || string.IsNullOrEmpty(shapeId))
-                return null;
+                return default;
             
             return model.Shapes.FirstOrDefault(s => s.Id == shapeId);
         }

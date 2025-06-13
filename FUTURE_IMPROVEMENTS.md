@@ -6,9 +6,11 @@ This document outlines planned improvements and feature additions for the Smithy
 
 ### Parser Improvements
 
-1. **Multi-line Parser Enhancement**
+1. **Multi-line Parser Enhancement** ✓ IMPLEMENTED
    - Improve parsing of complex multi-line blocks in Smithy IDL
    - Support nested structure definitions with proper indentation handling
+   - Added proper balance checking for nested parentheses and braces
+   - Enhanced parsing of trait properties with complex values
 
 2. **Error Recovery**
    - Enhance error reporting with line numbers and suggested fixes
