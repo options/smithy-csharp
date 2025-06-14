@@ -53,30 +53,6 @@ dotnet build
 dotnet tool install -g --add-source ./nupkg Smithy.CSharp
 ```
 
-### Versioning and Releases
-
-The project follows semantic versioning (SemVer). When creating releases:
-
-1. Update the version in `Smithy.Cli/Smithy.Cli.csproj`:
-   ```xml
-   <Version>X.Y.Z</Version>
-   <AssemblyVersion>X.Y.Z.0</AssemblyVersion>
-   <FileVersion>X.Y.Z.0</FileVersion>
-   ```
-
-2. Create and push a tag that matches the version:
-   ```bash
-   git tag vX.Y.Z
-   git push origin vX.Y.Z
-   ```
-
-This will trigger the GitHub Actions release workflow which will:
-- Build and test the solution
-- Package the tool with the version from the tag
-- Create a GitHub Release with the package attached
-- Publish the package to NuGet.org
-```
-
 You can also use the provided scripts:
 - Windows: `.\pack-tool.ps1`
 - macOS/Linux: `./pack-tool.sh`
