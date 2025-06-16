@@ -95,95 +95,157 @@ if (!System.IO.File.Exists(inputPath))
     return;
 }
 string modelText = inputPath != null ? System.IO.File.ReadAllText(inputPath) : sampleSmithy;
-ISmithyModelParser parser;
-if (inputPath != null && inputPath.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
-    parser = new SmithyJsonAstParser();
-else
-    parser = new SmithyModelParser();
-ISmithyModelValidator validator = new SmithyModelValidator();
 
-// Parse and validate the model
-SmithyModel model = parser.Parse(modelText);
-List<string> errors = validator.Validate(model);
+// Use the new enhanced parser with error recovery
+var enhancedParser = new SmithyModelParserV2();
+var parseResult = enhancedParser.ParseWithDiagnostics(modelText);
 
-// Display namespace and shapes information
-Console.WriteLine($"Model namespace: {model.Namespace}");
-Console.WriteLine($"Found {model.Shapes.Count} shapes.");
+// Display parsing results with diagnostics
+Console.WriteLine($"Model namespace: {parseResult.Model.Namespace}");
+Console.WriteLine($"Found {parseResult.Model.Shapes.Count} shapes.");
+Console.WriteLine($"Parse result: {(parseResult.IsSuccess ? "Success" : "Partial/Failed")}");
+Console.WriteLine();
 
-if (errors.Count == 0)
+// Display diagnostics
+if (parseResult.Diagnostics.Count > 0)
 {
-    Console.WriteLine("Smithy 모델이 유효합니다.");
-}
-else
-{
-    Console.WriteLine("Smithy 모델 오류:");
-    foreach (var error in errors)
-        Console.WriteLine("- " + error);
-}
-
-Console.WriteLine("파싱된 Shape 목록:");
-foreach (var shape in model.Shapes)
-{
-    Console.WriteLine($"- {shape.GetType().Name}: {shape.Id}");
-}
-
-// operation, structure도 샘플 입력에 맞게 파싱되는지 확인
-Console.WriteLine("파싱된 Shape 목록 (추가 정보):");
-foreach (var shape in model.Shapes)
-{
-    switch (shape)
+    Console.WriteLine("=== PARSING DIAGNOSTICS ===");
+    
+    // Group by severity
+    var errors = parseResult.GetDiagnostics(DiagnosticSeverity.Error).ToList();
+    var fatals = parseResult.GetDiagnostics(DiagnosticSeverity.Fatal).ToList();
+    var warnings = parseResult.GetDiagnostics(DiagnosticSeverity.Warning).ToList();
+    var infos = parseResult.GetDiagnostics(DiagnosticSeverity.Info).ToList();
+    
+    if (fatals.Count > 0)
     {
-        case OperationShape op:
-            Console.WriteLine($"- Operation: {op.Id}, Input: {op.Input}, Output: {op.Output}");
-            break;
-        case StructureShape str:
-            Console.Write($"- Structure: {str.Id}, Members: {str.Members.Count}");
-            if (str.Members.Count > 0)
-            {
-                Console.Write(" [");
-                Console.Write(string.Join(", ", str.Members.Select(m => $"{m.Name}: {m.Target}")));
-                Console.Write("]");
-            }
-            Console.WriteLine();
-            break;
-        case ServiceShape svc:
-            Console.WriteLine($"- Service: {svc.Id}, Operations: {svc.Operations.Count}");
-            break;
-        default:
-            Console.WriteLine($"- {shape.GetType().Name}: {shape.Id}");
-            break;
-    }
-}
-
-// Code generation using the new V2 generator
-Console.WriteLine("Generating code with the updated generator...");
-var generator = new CSharpCodeGeneratorV2();
-string generatedCode = generator.Generate(model);
-
-// Determine output path
-string finalOutputPath;
-
-if (!string.IsNullOrWhiteSpace(outputDirectory))
-{
-    // Create output directory if it doesn't exist
-    if (!System.IO.Directory.Exists(outputDirectory))
-    {
-        System.IO.Directory.CreateDirectory(outputDirectory);
+        Console.WriteLine($"\n🚫 FATAL ERRORS ({fatals.Count}):");
+        foreach (var diagnostic in fatals)
+        {
+            Console.WriteLine($"  {diagnostic}");
+        }
     }
     
-    // Use service name for the filename if available
-    var svc = model.Shapes.OfType<ServiceShape>().FirstOrDefault();
-    var serviceName = svc != null ? svc.Id : "Generated";
-    finalOutputPath = Path.Combine(outputDirectory, serviceName + ".cs");
+    if (errors.Count > 0)
+    {
+        Console.WriteLine($"\n❌ ERRORS ({errors.Count}):");
+        foreach (var diagnostic in errors)
+        {
+            Console.WriteLine($"  {diagnostic}");
+        }
+    }
+    
+    if (warnings.Count > 0)
+    {
+        Console.WriteLine($"\n⚠️  WARNINGS ({warnings.Count}):");
+        foreach (var diagnostic in warnings)
+        {
+            Console.WriteLine($"  {diagnostic}");
+        }
+    }
+    
+    if (infos.Count > 0)
+    {
+        Console.WriteLine($"\nℹ️  INFO ({infos.Count}):");
+        foreach (var diagnostic in infos)
+        {
+            Console.WriteLine($"  {diagnostic}");
+        }
+    }
+    
+    Console.WriteLine();
+}
+
+// Legacy validation for compatibility
+ISmithyModelValidator validator = new SmithyModelValidator();
+List<string> legacyErrors = validator.Validate(parseResult.Model);
+
+if (legacyErrors.Count > 0)
+{
+    Console.WriteLine("=== LEGACY VALIDATION ERRORS ===");
+    foreach (var error in legacyErrors)
+        Console.WriteLine("- " + error);
+    Console.WriteLine();
+}
+
+// Summary
+if (parseResult.IsSuccess && legacyErrors.Count == 0)
+{
+    Console.WriteLine("✅ Smithy model is valid and ready for code generation.");
+}
+else if (!parseResult.HasFatalErrors)
+{
+    Console.WriteLine("⚠️  Smithy model has issues but partial code generation may be possible.");
 }
 else
 {
-    // No directory specified, use current directory
-    var svc = model.Shapes.OfType<ServiceShape>().FirstOrDefault();
-    var serviceName = svc != null ? svc.Id : "Generated";
-    finalOutputPath = Path.Combine(Environment.CurrentDirectory, serviceName + ".cs");
+    Console.WriteLine("❌ Smithy model has fatal errors - code generation not recommended.");
 }
 
-// Save the generated code
-System.IO.File.WriteAllText(finalOutputPath, generatedCode);
-Console.WriteLine($"C# code generated successfully to: {finalOutputPath}");
+// Only proceed with code generation if we have a valid model
+if (parseResult.IsSuccess || !parseResult.HasFatalErrors)
+{
+    Console.WriteLine("\n=== PARSED SHAPES ===");
+    foreach (var shape in parseResult.Model.Shapes)
+    {
+        switch (shape)
+        {
+            case OperationShape op:
+                Console.WriteLine($"- Operation: {op.Id}, Input: {op.Input}, Output: {op.Output}");
+                break;
+            case StructureShape str:
+                Console.Write($"- Structure: {str.Id}, Members: {str.Members.Count}");
+                if (str.Members.Count > 0)
+                {
+                    Console.Write(" [");
+                    Console.Write(string.Join(", ", str.Members.Select(m => $"{m.Name}: {m.Target}")));
+                    Console.Write("]");
+                }
+                Console.WriteLine();
+                break;
+            case ServiceShape svc:
+                Console.WriteLine($"- Service: {svc.Id}, Operations: {svc.Operations.Count}");
+                break;
+            default:
+                Console.WriteLine($"- {shape.GetType().Name}: {shape.Id}");
+                break;
+        }
+    }
+
+    // Code generation using the V2 generator
+    Console.WriteLine("\n=== CODE GENERATION ===");
+    var generator = new CSharpCodeGeneratorV2();
+    string generatedCode = generator.Generate(parseResult.Model);
+
+    // Determine output path
+    string finalOutputPath;
+
+    if (!string.IsNullOrWhiteSpace(outputDirectory))
+    {
+        // Create output directory if it doesn't exist
+        if (!System.IO.Directory.Exists(outputDirectory))
+        {
+            System.IO.Directory.CreateDirectory(outputDirectory);
+        }
+        
+        // Use service name for the filename if available
+        var svc = parseResult.Model.Shapes.OfType<ServiceShape>().FirstOrDefault();
+        var serviceName = svc != null ? svc.Id : "Generated";
+        finalOutputPath = Path.Combine(outputDirectory, serviceName + ".cs");
+    }
+    else
+    {
+        // No directory specified, use current directory
+        var svc = parseResult.Model.Shapes.OfType<ServiceShape>().FirstOrDefault();
+        var serviceName = svc != null ? svc.Id : "Generated";
+        finalOutputPath = Path.Combine(Environment.CurrentDirectory, serviceName + ".cs");
+    }
+
+    // Save the generated code
+    System.IO.File.WriteAllText(finalOutputPath, generatedCode);
+    Console.WriteLine($"✅ C# code generated successfully to: {finalOutputPath}");
+}
+else
+{
+    Console.WriteLine("❌ Code generation skipped due to fatal parsing errors.");
+}

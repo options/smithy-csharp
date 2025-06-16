@@ -1,24 +1,50 @@
-# Future Improvements
-
-This document outlines planned improvements and feature additions for the Smithy C# Code Generator project. These items are organized by priority and may be implemented in future releases.
+# Future Improvements for Smithy C# Code Generator
 
 ## High Priority
 
-### Parser Improvements
+### 1. Error Recovery in Parser ✅ (Partially Complete)
+- ✅ Enhanced error reporting with line numbers and suggested fixes.
+- ✅ Implement partial model generation even with non-critical errors.
+- ⚠️ **Remaining Issues**: 
+  - Duplicate shape ID detection needs refinement
+  - Trait validation warnings not properly triggered
+  - Complex parsing scenarios require more robust handling
 
-1. **Multi-line Parser Enhancement** ✓ IMPLEMENTED
-   - Improve parsing of complex multi-line blocks in Smithy IDL
-   - Support nested structure definitions with proper indentation handling
-   - Added proper balance checking for nested parentheses and braces
-   - Enhanced parsing of trait properties with complex values
+### 2. Parser Architecture Overhaul 🆕 (Critical for Complete Error Recovery)
+Current string-based parsing approach has fundamental limitations that prevent complete error recovery implementation:
 
-2. **Error Recovery**
-   - Enhance error reporting with line numbers and suggested fixes
-   - Implement partial model generation even with non-critical errors
+**Current Limitations:**
+- Simple string matching instead of proper tokenization
+- Limited state management for complex parsing scenarios
+- Difficulty in handling multi-line definitions and nested structures
+- Hard to debug parsing issues and intermediate states
 
-3. **JSON AST Parser Completion**
-   - Complete the implementation of Smithy JSON AST format parsing
-   - Support all Smithy 2.0 features in JSON format
+**Recommended Solutions:**
+1. **Token-based Parser Implementation**
+   - Replace line-by-line string matching with proper tokenization
+   - Implement lexical analysis phase separate from parsing
+   - Better handling of whitespace, comments, and complex syntax
+
+2. **AST (Abstract Syntax Tree) Structure**
+   - Build proper tree representation of Smithy models
+   - Enable better error recovery and partial parsing
+   - Facilitate more sophisticated validation and analysis
+
+3. **Dedicated Grammar Parser Library Integration**
+   - Consider ANTLR, Pidgin, or similar parsing libraries
+   - Leverage proven parsing techniques and error recovery mechanisms
+   - Benefit from grammar-first approach with automatic parser generation
+
+4. **Staged Parsing Pipeline**
+   - Separate lexical analysis, syntax parsing, and semantic validation
+   - Enable independent error recovery at each stage
+   - Better error reporting with precise location and context
+
+**Implementation Priority:** Should be addressed before completing other high-priority features, as it affects the foundation of all parsing-related improvements.
+
+### 3. JSON AST Parser Completion
+- Complete the implementation of Smithy JSON AST format parsing.
+- Support all Smithy 2.0 features in JSON format
 
 ### Core Type System
 
